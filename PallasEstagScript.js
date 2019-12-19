@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pallas EstagScript
 // @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
-// @version      1.3.5
+// @version      1.3.6
 // @description  Cálculo de horas pallas estagiário
 // @author       AndradeMatheus - Matheus Andrade (Pesquisa & Desenvolvimento)
 // @copyright    2019+, AndradeMatheus (https://github.com/AndradeMatheus)
@@ -13,13 +13,9 @@
 // @require      http://code.jquery.com/jquery-3.4.1.min.js
 // ==/UserScript==
 
-window.addEventListener(
-  "load",
-  function() {
+window.jQuery("iframe#ifrmPai").on('load', function(){
     calculatePallas();
-  },
-  false
-);
+});
 
 function calculatePallas() {
   var date = new Date();
