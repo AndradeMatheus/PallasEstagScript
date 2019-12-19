@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Pallas EstagScript
+// @name         -DEV Pallas EstagScript DEV-
 // @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
-// @version      0.1
+// @version      10
 // @description  Cálculo de horas pallas estagiário
 // @author       AndradeMatheus - Matheus Andrade (Pesquisa & Desenvolvimento)
 // @copyright    2019+, AndradeMatheus (https://github.com/AndradeMatheus)
@@ -13,9 +13,19 @@
 // @require      http://code.jquery.com/jquery-3.4.1.min.js
 // ==/UserScript==
 
+window.jQuery("#linkDropdownEmpresas").click(calculatePallas());
+
 window.addEventListener(
   "load",
   function() {
+    window.jQuery(".menuTopo").prepend(`
+            <li id="divCalcEstagio" class="liTopo li-notificacao">
+							<a id="linkDropdownEmpresas" href="#" class="has-submenu">
+								<i id="imagemCalcEstagio" class="fa fa-refresh corFonte"></i>
+								<label id="labelCalcEstagio" class='label-icon-descricao'>RECALC PALLAS</label>
+							</a>
+            </li>`);
+
     calculatePallas();
   },
   false
@@ -132,17 +142,3 @@ function getDaysInMonth(month, year, toDate = false) {
 
   return days;
 }
-
-/*function checkIframeLoaded() {
-  // Get a handle to the iframe element
-  var iframe = document.getElementById("ifrmJanela");
-  var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-  // Check if loading is complete
-  if (iframeDoc.readyState == "complete") {
-    calculatePallas();
-    return;
-  }
-
-  window.setTimeout(checkIframeLoaded, 100);
-}*/
