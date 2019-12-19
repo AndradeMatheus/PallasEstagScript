@@ -1,10 +1,14 @@
 // ==UserScript==
-// @name         PallasEstagScript
-// @namespace    http://tampermonkey.net/
-// @version      1.3.4
+// @name         Pallas EstagScript
+// @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
+// @version      1.3.5
 // @description  Cálculo de horas pallas estagiário
-// @author       Matheus Andrade (Pesquisa & Desenvolvimento)
+// @author       AndradeMatheus - Matheus Andrade (Pesquisa & Desenvolvimento)
+// @copyright    2019+, AndradeMatheus (https://github.com/AndradeMatheus)
 // @match        http://intranet/pallas/Default.aspx?eng_padrao=s&eng_idtela=5011&
+// @icon
+// @homepageURL  https://github.com/AndradeMatheus/PallasEstagScript/
+// @include      *github.com*
 // @grant        none
 // @require      http://code.jquery.com/jquery-3.4.1.min.js
 // ==/UserScript==
@@ -78,9 +82,11 @@ function calculatePallas() {
       minMes = date.getMinutes() + minMes;
     }
 
-    saida = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours() + Math.abs(sldMes)}:${
-      minMes < 10 ? "0" + minMes : minMes
-    }`;
+    var passouDia = date.getHours() + Math.abs(sldMes) >= 24 ? true : false;
+
+    saida = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${
+      passouDia ? 23 : date.getHours() + Math.abs(sldMes)
+    }:${passouDia ? 59 : minMes < 10 ? "0" + minMes : minMes}`;
   }
 
   //Atualiza as variáveis do HTML
