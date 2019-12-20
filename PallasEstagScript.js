@@ -1,21 +1,35 @@
 // ==UserScript==
 // @name         Pallas EstagScript
 // @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
-// @version      1.3.6
+// @version      1.4
 // @description  Cálculo de horas pallas estagiário
-// @author       AndradeMatheus - Matheus Andrade (Pesquisa & Desenvolvimento)
+// @author       AndradeMatheus - Matheus Andrade (https://github.com/AndradeMatheus)
+// @contributor  lucasvsouza28 - Lucas Souza (https://github.com/lucasvsouza28)
 // @copyright    2019+, AndradeMatheus (https://github.com/AndradeMatheus)
-// @match        http://intranet/pallas/Default.aspx?eng_padrao=s&eng_idtela=5011&
+// @match        http://intranet/pallas/*
 // @icon
 // @homepageURL  https://github.com/AndradeMatheus/PallasEstagScript/
 // @include      *github.com*
 // @grant        none
-// @require      http://code.jquery.com/jquery-3.4.1.min.js
 // ==/UserScript==
 
-window.jQuery("iframe#ifrmPai").on('load', function(){
-    calculatePallas();
+window.jQuery("iframe#ifrmPai").on("load", function() {
+  calculatePallas();
 });
+
+window.addEventListener(
+  "load",
+  function() {
+    window.jQuery(".menuTopo").prepend(`
+            <li id="divCalcEstagio" class="liTopo li-notificacao">
+							<a id="linkCalcEstagio" href="#" class="has-submenu">
+								<i id="imagemCalcEstagio" class="fa fa-refresh corFonte"></i>
+								<label id="labelCalcEstagio" class='label-icon-descricao'>RECALC PALLAS</label>
+							</a>
+            </li>`);
+  },
+  false
+);
 
 function calculatePallas() {
   var date = new Date();
