@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pallas EstagScript
 // @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
-// @version      1.4
+// @version      1.4.1
 // @description  Cálculo de horas pallas estagiário
 // @author       AndradeMatheus - Matheus Andrade (https://github.com/AndradeMatheus)
 // @contributor  lucasvsouza28 - Lucas Souza (https://github.com/lucasvsouza28)
@@ -34,7 +34,7 @@ window.addEventListener(
 function calculatePallas() {
   var date = new Date();
   var diasUteisMes = getDaysInMonth(date.getMonth(), date.getFullYear()).length;
-  var diasUteisHoje = getDaysInMonth(date.getMonth(), date.getFullYear(), true).length + 1;
+  var diasUteisHoje = getDaysInMonth(date.getMonth(), date.getFullYear(), true).length;
 
   //Calcula os apontamentos do mês
   //var totalMes = "79h 17min / 168h 0min";
@@ -121,7 +121,6 @@ function calculatePallas() {
 }
 
 function getDaysInMonth(month, year, toDate = false) {
-  month--;
   var current = new Date();
   var date = new Date(year, month, 1);
   var days = [];
