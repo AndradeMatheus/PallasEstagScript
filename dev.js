@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         [DEV] Pallas EstagScript [DEV]
+// @name         DEV Pallas EstagScript
 // @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
 // @version      10
 // @description  Cálculo de horas pallas estagiário
@@ -13,37 +13,45 @@
 // @grant        none
 // ==/UserScript==
 
-window.jQuery("iframe#ifrmPai").on("load", function() {
+var $$ = window.jQuery;
+var teste = null;
+
+$$("iframe#ifrmPai").on("load", function(e) {
   calculatePallas();
 });
 
 window.addEventListener(
   "load",
   function() {
-    window.jQuery(".menuTopo").prepend(`
-            <li id="divCalcEstagio" class="liTopo li-notificacao">
-							<a id="linkCalcEstagio" href="#" class="has-submenu">
-								<i id="imagemCalcEstagio" class="fa fa-refresh corFonte"></i>
-								<label id="labelCalcEstagio" class='label-icon-descricao'>RECALC PALLAS</label>
-							</a>
-            </li>`);
+    var li = $$(`<li id="divCalcEstagio" class="liTopo li-notificacao">
+                             <a id="linkCalcEstagio" href="#" class="has-submenu">
+                                 <i id="imagemCalcEstagio" class="fa fa-refresh corFonte"></i>
+                                 <label id="labelCalcEstagio" class='label-icon-descricao'>RECALC PALLAS</label>
+                             </a>
+             </li>`);
+
+    $$(li).click(function() {
+      calculatePallas();
+    });
+    $$(".menuTopo").prepend(li);
   },
   false
 );
 
 function calculatePallas() {
   var date = new Date();
-  var diasUteisMes = getDaysInMonth(date.getMonth(), date.getFullYear()).length;
-  var diasUteisHoje = getDaysInMonth(date.getMonth(), date.getFullYear(), true).length + 1;
+  var diasUteisHoje = date.getMonthBusinessDays(true);
+  var $frm = $$("iframe#ifrmPai").contents();
+  var $txtapontamentos_mes = $$("#txtapontamentos_mes", $frm);
+  var $txtapontamentos_dia = $$("#txtapontamentos_dia", $frm);
+  var $txtnr_horas_saldo_mes = $$("#txtnr_horas_saldo_mes", $frm);
+  var $txtdt_saida_programada = $$("#txtdt_saida_programada", $frm);
 
   //Calcula os apontamentos do mês
   //var totalMes = "79h 17min / 168h 0min";
 
-  var totalMes = window
-    .jQuery("iframe#ifrmPai")
-    .contents()
-    .find("#txtapontamentos_mes")
-    .text();
+  var totalMes = (teste && teste["totalMes"]) || $txtapontamentos_mes.text();
+
   var hMes = parseInt(totalMes.split(" /")[0].split("h ")[0], 10);
   var minMes = parseInt(
     totalMes
@@ -57,11 +65,7 @@ function calculatePallas() {
   totalMes = `${totalMes}/ ${aux}h 0min`;
 
   //Calcula os apontamentos do dia
-  var totalDia = window
-    .jQuery("iframe#ifrmPai")
-    .contents()
-    .find("#txtapontamentos_dia")
-    .text();
+  var totalDia = (teste && teste["totalDia"]) || $txtapontamentos_dia.text();
 
   aux = parseInt(totalDia.split("/ ")[1].split("h "), 10) - 2;
   totalDia = totalDia.split("/ ")[0];
@@ -99,46 +103,59 @@ function calculatePallas() {
     }:${passouDia ? 59 : minMes < 10 ? "0" + minMes : minMes}`;
   }
 
+  if (!teste) {
+    teste = { totalMes: $$("#txtapontamentos_mes", $frm), totalDia: $$("#txtapontamentos_dia", $frm) };
+  }
+
   //Atualiza as variáveis do HTML
-  window
-    .jQuery("iframe#ifrmPai")
-    .contents()
-    .find("#txtapontamentos_mes")[0].innerHTML = totalMes;
-  window
-    .jQuery("iframe#ifrmPai")
-    .contents()
-    .find("#txtapontamentos_dia")[0].innerHTML = totalDia;
-  window
-    .jQuery("iframe#ifrmPai")
-    .contents()
-    .find("#txtnr_horas_saldo_mes")[0].innerHTML = totalSaldo;
-  window
-    .jQuery("iframe#ifrmPai")
-    .contents()
-    .find("#txtdt_saida_programada")[0].innerHTML = saida;
+  $txtapontamentos_mes[0].innerHTML = totalMes;
+  $txtapontamentos_dia[0].innerHTML = totalDia;
+  $txtnr_horas_saldo_mes[0].innerHTML = totalSaldo;
+  $txtdt_saida_programada[0].innerHTML = saida;
 
   return true;
 }
 
-function getDaysInMonth(month, year, toDate = false) {
-  month--;
-  var current = new Date();
-  var date = new Date(year, month, 1);
-  var days = [];
-  while (date.getMonth() === month) {
-    var tmpDate = new Date(date);
-    var weekDay = tmpDate.getDay();
-    var day = tmpDate.getDate();
+/*
+ * Valida se é dia útil
+ * returns   true = é dia útil, false = não é dia útil
+ */
+Date.prototype.isBusinessDay = function() {
+  return this.getDay() % 6;
+};
 
-    if (toDate && current.getDate() < tmpDate.getDate()) break;
+/*
+ * Retorna quantidade de dias no mês
+ * returns   quantidade de dias no mês
+ */
+Date.prototype.getDaysInMonth = function() {
+  return new Date(this.getFullYear(), this.getMonth() + 1, 0).getDate();
+};
 
-    if (weekDay % 6) {
-      // exclui sabado e domingo
-      days.push(day);
+/*
+ * Retorna quantidade de dias úteis no mês. Se toDate = true, retorna quantidade de dias úteis até o hoje
+ * returns   Quantidade de dias úteis no mês
+ */
+Date.prototype.getMonthBusinessDays = function(toDate = false) {
+  debugger;
+  var year = this.getFullYear();
+  var month = this.getMonth();
+  var today = new Date();
+
+  // obtem quantidade de dias no mês
+  var daysInMonth = this.getDaysInMonth();
+  var ret = [];
+
+  for (var i = 0; i < daysInMonth; i++) {
+    var tmp = new Date(year, month, i + 1);
+
+    // valida se é um dia útil
+    if (tmp.isBusinessDay()) {
+      // valida se deve calcular somente até o dia atual
+      if (toDate && i >= today.getDate()) break;
+
+      ret.push(i);
     }
-
-    date.setDate(date.getDate() + 1);
   }
-
-  return days;
-}
+  return ret.length;
+};
