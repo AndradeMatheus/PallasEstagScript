@@ -51,7 +51,7 @@ function calculatePallas() {
   //Calcula os apontamentos do mês
   //var totalMes = "79h 17min / 168h 0min";
 
-  var totalMes = (teste && teste["totalMes"]) || $txtapontamentos_mes.text();
+  var totalMes = (teste && teste.totalMes) || $txtapontamentos_mes.text();
 
   var hMes = parseInt(totalMes.split(" /")[0].split("h ")[0], 10);
   var minMes = parseInt(
@@ -66,7 +66,7 @@ function calculatePallas() {
   totalMes = `${totalMes}/ ${aux}h 0min`;
 
   //Calcula os apontamentos do dia
-  var totalDia = (teste && teste["totalDia"]) || $txtapontamentos_dia.text();
+  var totalDia = (teste && teste.totalDia) || $txtapontamentos_dia.text();
 
   aux = parseInt(totalDia.split("/ ")[1].split("h "), 10) - 2;
   totalDia = totalDia.split("/ ")[0];
@@ -154,9 +154,36 @@ Date.prototype.getMonthBusinessDays = function(toDate = false) {
     if (tmp.isBusinessDay()) {
       // valida se deve calcular somente até o dia atual
       if (toDate && i >= today.getDate()) break;
-
+      if (checkHolidays(tmp.getDate(), month + 1)) continue;
       ret.push(i);
     }
   }
   return ret.length;
 };
+
+function checkHolidays(d, m) {
+  var holidays = {
+    "1,1": "Ano Novo",
+    "25,1": "Aniversário da Cidade",
+    "24,2": "Carnaval",
+    "25,2": "Carnaval",
+    "26,2": "Carnaval",
+    "10,4": "Sexta-Feira Santa",
+    "10,4": "Sexta-feira Santa",
+    "21,4": "Dia de Tiradentes",
+    "1,5": "Dia do Trabalho",
+    "11,6": "Corpus Christi",
+    "9,7": "Revolução Constitucionalista",
+    "7,9": "Independência do Brasil",
+    "12,10": "Nossa Senhora Aparecida",
+    "15,10": "Dia do Professor",
+    "28,10": "Dia do Servidor Público",
+    "2,11": "Dia de Finados",
+    "15,11": "Proclamação da República",
+    "20,11": "Dia da Consciência Negra",
+    "25,12": "Natal"
+  };
+
+  if ((holidays[`${d},${m}`] || 0) != 0) return true;
+  else return false;
+}
