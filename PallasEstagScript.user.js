@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pallas EstagScript
 // @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
-// @version      1.7.1
+// @version      1.7.2
 // @description  Cálculo de horas pallas estagiário
 // @author       AndradeMatheus - Matheus Andrade (https://github.com/AndradeMatheus)
 // @contributor  lucasvsouza28 - Lucas Souza (https://github.com/lucasvsouza28)
@@ -10,8 +10,8 @@
 // @icon
 // @homepageURL  https://github.com/AndradeMatheus/PallasEstagScript/
 // @include      *github.com*
-// @require      https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js
-// @require      https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.4/dist/axiosGmxhrAdapter.min.js
+// @require      https://raw.githubusercontent.com/AndradeMatheus/PallasEstagScript/master/axios.min.js
+// @require      https://raw.githubusercontent.com/AndradeMatheus/PallasEstagScript/master/axiosGmxhrAdapter.min.js
 // @grant        none
 // ==/UserScript==
 
