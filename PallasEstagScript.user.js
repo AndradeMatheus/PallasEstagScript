@@ -21,7 +21,7 @@
     `https://api.calendario.com.br/?json=true&ano=${new Date().getFullYear()}&estado=SP&cidade=SAO_PAULO&token=M3JyYmxwdmEuejNlQDIwbWludXRlbWFpbC5pdCZoYXNoPTIwMDA1Mg`
   );
 
-  $$("#labelAbaModulo")[0].innerHTML = "Pallas Estagiário v1.7.1";
+  $$("#labelAbaModulo")[0].innerHTML = "Pallas Estagiário v1.7.2";
 
   $$("iframe#ifrmPai").on("load", function(e) {
     calculatePallas();
