@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pallas EstagScript
 // @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
-// @version      1.8a
+// @version      1.8
 // @description  Cálculo de horas pallas estagiário
 // @author       AndradeMatheus - Matheus Andrade (https://github.com/AndradeMatheus)
 // @contributor  lucasvsouza28 - Lucas Souza (https://github.com/lucasvsouza28)
@@ -18,14 +18,17 @@
 (async function($$, axios) {
   let pallasStore;
   let holidays;
-  debugger;
   try {
-    const { data: holidays } = await axios.get(
+    ({ data: holidays } = await axios.get(
       `https://api.calendario.com.br/?json=true&ano=${new Date().getFullYear()}&estado=SP&cidade=SAO_PAULO&token=M3JyYmxwdmEuejNlQDIwbWludXRlbWFpbC5pdCZoYXNoPTIwMDA1Mg`
-    );
+    ));
   } catch (err) {
     console.log(err);
-    holidays = $$.getJSON("https://api.myjson.com/bins/1c5i7q", function(holidays) {});
+    $$.getJSON("https://raw.githubusercontent.com/AndradeMatheus/PallasEstagScript/master/feriados.json", function(
+      json
+    ) {
+      holidays = json;
+    });
   }
 
   $$("#labelAbaModulo")[0].innerHTML = "Pallas Estagiário v1.8";
@@ -49,6 +52,7 @@
       });
       $$(".menuTopo").prepend(li);
       $$(".menuTopo").prepend(`              <li id="divFeriasEstagio" class="liTopo li-notificacao">
+Dias de férias: 
                 <input type="text" name="diasFerias" id="diasFerias" style="text-align:center; width: 50px; margin-top: 9px;">
               </li>`);
     },
@@ -65,7 +69,7 @@
     var $txtdt_saida_programada = $$("#txtdt_saida_programada", $frm);
 
     //Calcula os apontamentos do mês
-    //var totalMes = "71h 9min / 168h 0min";
+    //var totalMes = "95h 9min / 168h 0min";
 
     var totalMes = (pallasStore && pallasStore.totalMes) || $txtapontamentos_mes.text();
 
@@ -104,7 +108,7 @@
     } else {
       minMes = minMes > 0 ? 60 - minMes : 0;
       sldMes = minMes > 0 ? sldMes + 1 : sldMes;
-      totalSaldo = `${sldMes}h ${minMes}min`;
+      totalSaldo = `-${-sldMes}h ${minMes}min`;
 
       if (date.getMinutes() + minMes >= 60) {
         minMes = date.getMinutes() - 60 + minMes;
