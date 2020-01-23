@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pallas EstagScript
 // @namespace    http://github.com/AndradeMatheus/PallasEstagScript/
-// @version      1.7.2
+// @version      1.8a
 // @description  Cálculo de horas pallas estagiário
 // @author       AndradeMatheus - Matheus Andrade (https://github.com/AndradeMatheus)
 // @contributor  lucasvsouza28 - Lucas Souza (https://github.com/lucasvsouza28)
@@ -17,11 +17,18 @@
 
 (async function($$, axios) {
   let pallasStore;
-  const { data: holidays } = await axios.get(
-    `https://api.calendario.com.br/?json=true&ano=${new Date().getFullYear()}&estado=SP&cidade=SAO_PAULO&token=M3JyYmxwdmEuejNlQDIwbWludXRlbWFpbC5pdCZoYXNoPTIwMDA1Mg`
-  );
+  let holidays;
+  debugger;
+  try {
+    const { data: holidays } = await axios.get(
+      `https://api.calendario.com.br/?json=true&ano=${new Date().getFullYear()}&estado=SP&cidade=SAO_PAULO&token=M3JyYmxwdmEuejNlQDIwbWludXRlbWFpbC5pdCZoYXNoPTIwMDA1Mg`
+    );
+  } catch (err) {
+    console.log(err);
+    holidays = $$.getJSON("https://api.myjson.com/bins/1c5i7q", function(holidays) {});
+  }
 
-  $$("#labelAbaModulo")[0].innerHTML = "Pallas Estagiário v1.7.2";
+  $$("#labelAbaModulo")[0].innerHTML = "Pallas Estagiário v1.8";
 
   $$("iframe#ifrmPai").on("load", function(e) {
     calculatePallas();
@@ -38,14 +45,17 @@
               </li>`);
 
       $$(li).click(function() {
-        calculatePallas();
+        calculatePallas(document.getElementById("diasFerias").value);
       });
       $$(".menuTopo").prepend(li);
+      $$(".menuTopo").prepend(`              <li id="divFeriasEstagio" class="liTopo li-notificacao">
+                <input type="text" name="diasFerias" id="diasFerias" style="text-align:center; width: 50px; margin-top: 9px;">
+              </li>`);
     },
     false
   );
 
-  function calculatePallas() {
+  function calculatePallas(diasFerias = 0) {
     var date = new Date();
     var diasUteisHoje = date.getMonthBusinessDays(true);
     var $frm = $$("iframe#ifrmPai").contents();
@@ -55,7 +65,7 @@
     var $txtdt_saida_programada = $$("#txtdt_saida_programada", $frm);
 
     //Calcula os apontamentos do mês
-    //var totalMes = "79h 17min / 168h 0min";
+    //var totalMes = "71h 9min / 168h 0min";
 
     var totalMes = (pallasStore && pallasStore.totalMes) || $txtapontamentos_mes.text();
 
@@ -67,7 +77,7 @@
         .replace("min", ""),
       10
     );
-    var aux = (parseInt(totalMes.split("/ ")[1].split("h "), 10) / 8) * 6;
+    var aux = (parseInt(totalMes.split("/ ")[1].split("h "), 10) / 8) * 6 - diasFerias * 6;
     totalMes = totalMes.split("/ ")[0];
     totalMes = `${totalMes}/ ${aux}h 0min`;
 
