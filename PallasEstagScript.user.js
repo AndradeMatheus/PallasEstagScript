@@ -19,16 +19,12 @@
   let pallasStore;
   let holidays;
   try {
-    ({ data: holidays } = await axios.get(
+    ({ data: holidays } = await axios(
       `https://api.calendario.com.br/?json=true&ano=${new Date().getFullYear()}&estado=SP&cidade=SAO_PAULO&token=M3JyYmxwdmEuejNlQDIwbWludXRlbWFpbC5pdCZoYXNoPTIwMDA1Mg`
     ));
   } catch (err) {
-    console.log(err);
-    $$.getJSON("https://raw.githubusercontent.com/AndradeMatheus/PallasEstagScript/master/feriados.json", function(
-      json
-    ) {
-      holidays = json;
-    });
+    // console.log(err);
+    ({ data: holidays } =  await axios('https://raw.githubusercontent.com/AndradeMatheus/PallasEstagScript/master/feriados.json'));
   }
 
   $$("#labelAbaModulo")[0].innerHTML = "Pallas Estagiário v1.8.1";
@@ -86,43 +82,15 @@ Dias de férias:
     totalMes = `${totalMes}/ ${aux}h 0min`;
 
     //Calcula os apontamentos do dia
-    var totalDia = (pallasStore && pallasStore.totalDia) || $txtapontamentos_dia.text();
+    let totalDia = (pallasStore && pallasStore.totalDia) || $txtapontamentos_dia.text();
 
     aux = parseInt(totalDia.split("/ ")[1].split("h "), 10) - 2;
     totalDia = totalDia.split("/ ")[0];
     totalDia = `${totalDia}/ ${aux}h 0min`;
 
     //Calcula o saldo do mês e a saída ideal
-    var saida = "";
-    var sldMes = -(diasUteisHoje * 6 - hMes) + diasFerias * 6;
-    var totalSaldo = "";
-
-    if (sldMes == 0 && minMes == 0) {
-      totalSaldo = "ZEROU O SALDO!";
-      alert("Hora de ir embora!");
-      saida = "VAI EMBORA!!";
-    } else if (sldMes >= 0) {
-      totalSaldo = `+${sldMes}h ${minMes}min`;
-      alert(`Cara, vai embora! Você tem ${totalSaldo.replace("+", "").replace(" ", " e ")} a mais!`);
-      saida = "VAI EMBORA!!";
-    } else {
-      minMes = minMes > 0 ? 60 - minMes : 0;
-      sldMes = minMes > 0 ? sldMes + 1 : sldMes;
-      totalSaldo = `-${-sldMes}h ${minMes}min`;
-
-      if (date.getMinutes() + minMes >= 60) {
-        minMes = date.getMinutes() - 60 + minMes;
-        sldMes -= 1;
-      } else {
-        minMes = date.getMinutes() + minMes;
-      }
-
-      var passouDia = date.getHours() + Math.abs(sldMes) >= 24 ? true : false;
-
-      saida = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${
-        passouDia ? 23 : date.getHours() + Math.abs(sldMes)
-      }:${passouDia ? 59 : minMes < 10 ? "0" + minMes : minMes}`;
-    }
+    const sldMes = -(diasUteisHoje * 6 - hMes) + diasFerias * 6;
+    const { saida, totalSaldo } = getCalcOutput(date, sldMes, minMes);
 
     if (!pallasStore) {
       pallasStore = {
@@ -140,25 +108,68 @@ Dias de férias:
     return true;
   }
 
-  /*
+  /**
+   * Retorna resultado do cálculo
+   * @param {Data} date 
+   * @param {Saldo} sldMes 
+   * @param {Minutos} minMes
+   * @returns   Resultado do cálculo em String
+   */
+  function getCalcOutput(date, sldMes, minMes){
+    let totalSaldo = '';
+    let saida = '';
+
+    if (sldMes == 0 && minMes == 0) {
+      totalSaldo = "ZEROU O SALDO!";      
+      saida = "VAI EMBORA!!";
+
+      alert("Hora de ir embora!");
+    } else if (sldMes >= 0) {
+      totalSaldo = `+${sldMes}h ${minMes}min`;
+      saida = "VAI EMBORA!!";
+
+      alert(`Cara, vai embora! Você tem ${totalSaldo.replace("+", "").replace(" ", " e ")} a mais!`);
+    } else {
+      minMes = minMes > 0 ? 60 - minMes : 0;
+      sldMes = minMes > 0 ? sldMes + 1 : sldMes;
+      totalSaldo = `-${-sldMes}h ${minMes}min`;
+
+      if (date.getMinutes() + minMes >= 60) {
+        minMes = date.getMinutes() - 60 + minMes;
+        sldMes -= 1;
+      } else {
+        minMes = date.getMinutes() + minMes;
+      }
+
+      var passouDia = date.getHours() + Math.abs(sldMes) >= 24 ? true : false;
+
+      saida = `${date.toLocaleDateString('pt-BR')} ${
+        passouDia ? 23 : date.getHours() + Math.abs(sldMes)}:${
+        passouDia ? 59 : minMes < 10 ? "0" + minMes : minMes}`;
+    }
+
+    return { saida, totalSaldo };
+  }
+
+  /**
    * Valida se é dia útil
-   * returns   true = é dia útil, false = não é dia útil
+   * @returns   true = é dia útil, false = não é dia útil
    */
   Date.prototype.isBusinessDay = function() {
     return this.getDay() % 6;
   };
 
-  /*
+  /**
    * Retorna quantidade de dias no mês
-   * returns   quantidade de dias no mês
+   * @returns   quantidade de dias no mês
    */
   Date.prototype.getDaysInMonth = function() {
     return new Date(this.getFullYear(), this.getMonth() + 1, 0).getDate();
   };
 
-  /*
+  /**
    * Retorna quantidade de dias úteis no mês. Se toDate = true, retorna quantidade de dias úteis até o hoje
-   * returns   Quantidade de dias úteis no mês
+   * @returns   Quantidade de dias úteis no mês
    */
   Date.prototype.getMonthBusinessDays = function(toDate = false) {
     var year = this.getFullYear();
@@ -176,18 +187,23 @@ Dias de férias:
       if (tmp.isBusinessDay()) {
         // valida se deve calcular somente até o dia atual
         if (toDate && i >= today.getDate()) break;
-        if (checkHolidays(tmp.getDate(), month + 1, year)) continue;
+        
+        // valida se é feriado
+        if (tmp.isHoliday()) continue;
         ret.push(i);
       }
     }
     return ret.length;
   };
 
-  function checkHolidays(d, m, y) {
-    for (let i = 0; i < holidays.length; i++) {
-      if (holidays[i].date == `${d}/${m}/${y}` && (holidays[i].type_code == 1 || 3)) return true;
-      else if (holidays[i].date == `0${d}/0${m}/${y}` && (holidays[i].type_code == 1 || 3)) return true;
-    }
+  /**
+   * Verifica se é feriado
+   * @returns True = É feriado, False = Não é feriado
+   */
+  Date.prototype.isHoliday = function() {
+    const isHoliday = holidays.filter(h => h.date == this.toLocaleDateString('pt-BR') && (h.type_code == 1 || h.type_code == 3));    
+
+    if (isHoliday.length) return true;
 
     return false;
   }
